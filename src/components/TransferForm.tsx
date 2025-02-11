@@ -1,20 +1,27 @@
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
+interface LocationState {
+  ticketCount: string;
+  // ...other existing state properties
+}
+
 const TransferForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState;
+  const ticketCount = state?.ticketCount || "1"; // fallback to "1" if not provided
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     contact: "",
     note: "",
-    ticketCount: 2,
+    ticketCount: ticketCount, // Use the passed ticketCount instead of hardcoded value
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +32,7 @@ const TransferForm = () => {
         last_name: formData.lastName,
         contact: formData.contact,
         note: formData.note,
-        quantity: formData.ticketCount,
+        quantity: Number(formData.ticketCount),
       }]).select();
 
       if (error) throw error;
@@ -49,8 +56,7 @@ const TransferForm = () => {
       </div>
 
       <Card className="p-6 hover:shadow-xl transition-all duration-300">
-        <h2 className="text-2xl font-bold mb-6 text-center hover:text-ticket-blue transition-colors">TRANSFER TICKETS</h2>
-        <p className="text-gray-600 mb-6 text-center">{formData.ticketCount} Tickets Selected</p>
+        <h2 className="text-2xl font-bold mb-6 text-center hover:text-ticket-blue transition-colors">{ticketCount} Tickets Selected</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="group">
@@ -109,7 +115,7 @@ const TransferForm = () => {
             type="submit"
             className="w-full bg-ticket-blue hover:bg-ticket-darkBlue text-white py-3 rounded-lg transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
           >
-            Transfer {formData.ticketCount} Tickets
+            Transfer {ticketCount} Tickets
           </Button>
         </form>
       </Card>

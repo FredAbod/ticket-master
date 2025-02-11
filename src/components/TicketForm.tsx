@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "./ui/input";
@@ -6,10 +5,17 @@ import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { parse } from "date-fns";
 import { useToast } from "./ui/use-toast";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
+import dayjs from 'dayjs';
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 const TicketForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [formData, setFormData] = useState({
     sec: "",
     row: "",
@@ -21,6 +27,14 @@ const TicketForm = () => {
     imageUrl: "",
     dateTime: "",
   });
+
+  const handleDateChange = (date: dayjs.Dayjs | null) => {
+    setSelectedDate(date?.toDate() || null);
+    if (date) {
+      const formattedDate = date.format('ddd, MMM D h:mm A');
+      setFormData(prev => ({ ...prev, dateTime: formattedDate }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +140,37 @@ const TicketForm = () => {
         </div>
       </div>
 
+      {/* Modified ticket count and other sit section */}
+      <div className="space-y-4">
+        <div className="group">
+          <label className="text-sm font-medium text-gray-700 group-hover:text-ticket-blue transition-colors">
+            How many tickets?
+          </label>
+          <Input
+            name="ticketCount"
+            type="number"
+            min="1"
+            value={formData.ticketCount}
+            onChange={handleChange}
+            className="mt-1 transition-all duration-300 hover:border-ticket-blue focus:ring-2 focus:ring-ticket-blue"
+            placeholder="1"
+            required
+          />
+        </div>
+        <div className="group">
+          <label className="text-sm font-medium text-gray-700 group-hover:text-ticket-blue transition-colors">
+            Other SIT (Optional)
+          </label>
+          <Input
+            name="otherSit"
+            value={formData.otherSit}
+            onChange={handleChange}
+            className="mt-1 transition-all duration-300 hover:border-ticket-blue focus:ring-2 focus:ring-ticket-blue"
+            placeholder="e.g. 12, 13, 14"
+          />
+        </div>
+      </div>
+
       <div className="group">
         <label className="text-sm font-medium text-gray-700 group-hover:text-ticket-blue transition-colors">Title</label>
         <Input
@@ -151,15 +196,35 @@ const TicketForm = () => {
       </div>
 
       <div className="group">
-        <label className="text-sm font-medium text-gray-700 group-hover:text-ticket-blue transition-colors">Date & Time</label>
+        <label className="text-sm font-medium text-gray-700 group-hover:text-ticket-blue transition-colors">Image URL</label>
         <Input
-          name="dateTime"
-          value={formData.dateTime}
+          name="imageUrl"
+          value={formData.imageUrl}
           onChange={handleChange}
           className="mt-1 transition-all duration-300 hover:border-ticket-blue focus:ring-2 focus:ring-ticket-blue"
-          placeholder="Mon, Feb 03 7:30 PM"
-          required
+          placeholder="https://example.com/image.jpg"
         />
+      </div>
+
+      <div className="group flex flex-col relative z-50">
+        <label className="text-sm font-medium text-gray-700 group-hover:text-ticket-blue transition-colors mb-1">
+          Date & Time
+        </label>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <MobileDateTimePicker
+            value={selectedDate ? dayjs(selectedDate) : null}
+            onChange={handleDateChange}
+            format="ddd, MMM D h:mm A"
+            className="w-full"
+            slotProps={{
+              textField: {
+                required: true,
+                placeholder: "Mon, Feb 03 7:30 PM",
+                className: "w-full p-2 border rounded-md transition-all duration-300 hover:border-ticket-blue focus:ring-2 focus:ring-ticket-blue"
+              }
+            }}
+          />
+        </LocalizationProvider>
       </div>
 
       <Button
