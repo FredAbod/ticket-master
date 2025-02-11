@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
 import { ScanLine, Ticket } from "lucide-react";  // Changed imports
+import TransferPopup from './TransferPopup';
 
 interface TicketPreviewProps {
   ticketData: {
@@ -23,6 +24,7 @@ const TicketPreview = ({ ticketData }: TicketPreviewProps) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollRef = useRef(null);
   const [imageError, setImageError] = useState(false);
+  const [showTransferPopup, setShowTransferPopup] = useState(false);
 
   const fallbackImage = "/lovable-uploads/5f96390f-e303-45cf-ae49-f5d1d9e67f6f.png";
 
@@ -132,52 +134,76 @@ const TicketPreview = ({ ticketData }: TicketPreviewProps) => {
   // Convert ticketCount to number and ensure it's at least 1
   const numberOfTickets = Math.max(1, parseInt(ticketData.ticketCount?.toString() || '1', 10));
 
+  const handleTransferClick = () => {
+    setShowTransferPopup(true);
+  };
+
+  const handleTransferConfirm = (selectedSeats: string[]) => {
+    setShowTransferPopup(false);
+    navigate("/transfer", { 
+      state: { 
+        ticketCount: selectedSeats.length,
+        selectedSeats: selectedSeats
+      } 
+    });
+  };
+
   return (
-    <Card className="w-screen max-w-full mx-auto overflow-hidden bg-white shadow-lg animate-fade-in">
-      <div 
-        ref={scrollRef}
-        className="overflow-x-auto scrollbar-hide snap-x snap-mandatory w-full"
-      >
-        <div className="inline-flex w-full">
-          {/* Replace static array with dynamic one based on ticketCount */}
+    <>
+      <Card className="w-screen max-w-full mx-auto overflow-hidden bg-white shadow-lg animate-fade-in">
+        <div 
+          ref={scrollRef}
+          className="overflow-x-auto scrollbar-hide snap-x snap-mandatory w-full"
+        >
+          <div className="inline-flex w-full">
+            {/* Replace static array with dynamic one based on ticketCount */}
+            {Array.from({ length: numberOfTickets }, (_, index) => (
+              <div key={index} className="snap-start w-full flex-none">
+                {renderTicket(index)}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-center space-x-2 py-4">
+          {/* Update pagination dots to match ticket count */}
           {Array.from({ length: numberOfTickets }, (_, index) => (
-            <div key={index} className="snap-start w-full flex-none">
-              {renderTicket(index)}
-            </div>
+            <button
+              key={index}
+              onClick={() => scrollToSlide(index)}
+              className={`h-2 w-2 rounded-full transition-all ${
+                activeSlide === index ? 'bg-[#007AFF] w-4' : 'bg-gray-300'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
           ))}
         </div>
-      </div>
 
-      <div className="flex justify-center space-x-2 py-4">
-        {/* Update pagination dots to match ticket count */}
-        {Array.from({ length: numberOfTickets }, (_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollToSlide(index)}
-            className={`h-2 w-2 rounded-full transition-all ${
-              activeSlide === index ? 'bg-[#007AFF] w-4' : 'bg-gray-300'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+        <div className="p-4 flex gap-4">
+          <button 
+            onClick={handleTransferClick}
+            className="flex-1 py-4 text-center text-white font-medium bg-[#007AFF] rounded-md hover:bg-[#0066CC] transition-colors"
+          >
+            Transfer
+          </button>
+          <button 
+            className="flex-1 py-4 text-center text-white font-medium bg-[#007AFF] rounded-md hover:bg-[#0066CC] transition-colors"
+          >
+            Sell
+          </button>
+        </div>
+      </Card>
 
-      <div className="p-4 flex gap-4">
-        <button 
-          onClick={() => navigate("/transfer", { 
-            state: { ticketCount: ticketData.ticketCount } 
-          })}
-          className="flex-1 py-4 text-center text-white font-medium bg-[#007AFF] rounded-md hover:bg-[#0066CC] transition-colors"
-        >
-          Transfer
-        </button>
-        <button 
-          className="flex-1 py-4 text-center text-white font-medium bg-[#007AFF] rounded-md hover:bg-[#0066CC] transition-colors"
-        >
-          Sell
-        </button>
-      </div>
-    </Card>
+      <TransferPopup
+        isOpen={showTransferPopup}
+        onClose={() => setShowTransferPopup(false)}
+        onConfirm={handleTransferConfirm}
+        ticketData={{
+          ...ticketData,
+          ticketCount: numberOfTickets
+        }}
+      />
+    </>
   );
 };
 
