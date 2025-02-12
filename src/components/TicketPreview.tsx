@@ -151,6 +151,13 @@ const TicketPreview = ({ ticketData }: TicketPreviewProps) => {
   return (
     <>
       <Card className="w-screen max-w-full mx-auto overflow-hidden bg-white shadow-lg animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between p-2 border-b bg-black text-white">
+          <button onClick={() => navigate(-1)} className="text-white text-sm">X</button>
+          <h1 className="text-base font-bold">My Tickets</h1>
+          <button className="text-white text-sm">Help</button>
+        </div>
+        {/* End of Header */}
         <div 
           ref={scrollRef}
           className="overflow-x-auto scrollbar-hide snap-x snap-mandatory w-full"

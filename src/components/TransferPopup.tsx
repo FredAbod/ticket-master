@@ -50,10 +50,10 @@ const TransferPopup = ({ isOpen, onClose, onConfirm, ticketData }: TransferPopup
           <h2 className="text-sm font-bold text-center uppercase tracking-tighter"> {/* Reduced size and spacing */}
             Select tickets to transfer
           </h2>
-          
-          <div className="bg-blue-50 p-3 rounded-lg flex gap-2 text-sm">
-            <Info className="text-ticket-blue shrink-0 h-4 w-4 mt-0.5" />
-            <p className="text-gray-700">
+          <hr className="border-gray-500" /> {/* More visible grey line */}
+          <div className="bg-white p-3 rounded-lg flex gap-2 text-sm border-2 border-black">
+            <Info className="text-black shrink-0 h-4 w-4 mt-0.5" />
+            <p className="text-black">
               Only transfer tickets to people you know and trust to ensure everyone stays safe and socially distanced
             </p>
           </div>
